@@ -20,9 +20,12 @@ void SwitchedStrip::Animate(void){
 	if(t - lastAnimate > MILLIS_BETWEEN_FRAMES && t <= animationFinishAt){
 		lastAnimate = t;
 		unsigned long animationRemaining = animationFinishAt - t;
-		float animProgress = 1 -  ((float)animationFinishAt - t / ANIMATION_DURATION);
+		float animProgress = 1 - ((float)animationRemaining / ANIMATION_DURATION);
 		float currBrightness = _lastSwitchState ? animProgress : 1 - animProgress;
 		int centerLed = _strip->numPixels() / 2;
+                Serial.print("Brights (");
+                Serial.print(currBrightness);
+                Serial.print("): ");
 		for(int light = 0; light < _strip->numPixels();light++){
 			float scale;
 			if(light<=centerLed){
@@ -31,8 +34,11 @@ void SwitchedStrip::Animate(void){
 				scale = 1 + (float) (centerLed - light) / (centerLed+1);
 			}
 			scale *= currBrightness;
+                        Serial.print(scale);
+                        Serial.print(" ");
 			_strip->setPixelColor(light,scale*_r,scale*_g,scale*_b);
 		}
+                Serial.println(".");
 		_strip->show();
 	}
 }
