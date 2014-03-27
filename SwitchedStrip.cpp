@@ -21,22 +21,20 @@ void SwitchedStrip::Animate(void){
 		lastAnimate = t;
 		unsigned long animationRemaining = animationFinishAt - t;
 		float animProgress = 1 - ((float)animationRemaining / ANIMATION_DURATION);
-		float currBrightness = _lastSwitchState ? animProgress : 1 - animProgress;
-		int centerLed = _strip->numPixels() / 2;
+		float animBrightness = _lastSwitchState ? animProgress : 1 - animProgress;
+                int pixels = _strip->numPixels();
                 Serial.print("Brights (");
-                Serial.print(currBrightness);
+                Serial.print(animBrightness);
                 Serial.print("): ");
-		for(int light = 0; light < _strip->numPixels();light++){
-			float scale;
-			if(light<=centerLed){
-				scale = (float) (light+1) / (centerLed+1);
-			}else{
-				scale = 1 + (float) (centerLed - light) / (centerLed+1);
-			}
-			scale *= currBrightness;
-                        Serial.print(scale);
+		for(int light = 0; light < pixels;light++){
+			float posBrightness = 2 * ((float)light+1) / (pixels+1);
+                        if(posBrightness > 1){
+                           posBrightness = 2 - posBrightness; 
+                        }
+                        float brightness = posBrightness * animBrightness;
+                        Serial.print(brightness);
                         Serial.print(" ");
-			_strip->setPixelColor(light,scale*_r,scale*_g,scale*_b);
+			_strip->setPixelColor(light,brightness*_r,brightness*_g,brightness*_b);
 		}
                 Serial.println(".");
 		_strip->show();
@@ -45,7 +43,8 @@ void SwitchedStrip::Animate(void){
 void SwitchedStrip::ProcessInput(void){
 	bool readVal = digitalRead(_switchPin) == _onState; 
 	if(readVal != _lastSwitchState){
-                //If we're currently in an animation, then we've switched off. Shorten the next animation appropriately.
+                //If we're currently in an animation, then shorten the next animation appropriately.
+                //(We want 0 1 2 1 0 not 0 1 2 10 9 8)
                 int animDur = ANIMATION_DURATION;
                 unsigned long t = millis();
                 if(t <= animationFinishAt){
