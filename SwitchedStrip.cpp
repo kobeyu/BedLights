@@ -45,7 +45,13 @@ void SwitchedStrip::Animate(void){
 void SwitchedStrip::ProcessInput(void){
 	bool readVal = digitalRead(_switchPin) == _onState; 
 	if(readVal != _lastSwitchState){
-		animationFinishAt = millis() + ANIMATION_DURATION;
+                //If we're currently in an animation, then we've switched off. Shorten the next animation appropriately.
+                int animDur = ANIMATION_DURATION;
+                unsigned long t = millis();
+                if(t <= animationFinishAt){
+                   animDur -= (animationFinishAt - t); 
+                }
+		animationFinishAt = t + animDur;
 		_lastSwitchState = readVal;
 	}
 }
