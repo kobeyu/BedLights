@@ -16,6 +16,7 @@ SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int
 	_g = g;
 	_b = b;
 }
+<<<<<<< HEAD
 void SwitchedStrip::On(bool onOrOff){
 	//If we're currently in an animation, then shorten the next animation appropriately.
 	//(We want 0 1 2 1 0 not 0 1 2 10 9 8)
@@ -26,10 +27,11 @@ void SwitchedStrip::On(bool onOrOff){
 	}
 	animationFinishAt = t + animDur;
 	_targetLightState = onOrOff;
-}
+=======
 bool SwitchedStrip::Animating(void){
    unsigned long t = millis();
    return t <= animationFinishAt;
+>>>>>>> tweaks
 }
 void SwitchedStrip::Animate(void){
 	unsigned long t = millis();

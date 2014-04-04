@@ -5,8 +5,11 @@ public:
 	SwitchedStrip(int ledPin,int ledCount, int switchPin,int r,int g, int b,int onState);
 	void ProcessInput(void);
 	void Animate(void);
+<<<<<<< HEAD
 	void On(bool onOrOff);
+=======
         bool Animating(void);
+>>>>>>> tweaks
 private:
 	Adafruit_NeoPixel * _strip;
 	int _switchPin;
