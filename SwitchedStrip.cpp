@@ -8,7 +8,7 @@ SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int
 	_targetLightState = false;
 	_strip = new Adafruit_NeoPixel(ledCount, ledPin, NEO_GRB + NEO_KHZ800);
 	_strip->begin();
-	_strip->setBrightness(100);
+        _strip->setBrightness(200);
 	_switchPin = switchPin;
 	_onState = onState;
 	pinMode(_switchPin, INPUT_PULLUP);

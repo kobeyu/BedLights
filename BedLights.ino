@@ -55,5 +55,7 @@ void loop()
 	s2.ProcessInput();
 	s1.Animate();
 	s2.Animate();
-        delay(50);
+        if(!s1.Animating() && !s2.Animating()){
+          delay(1000);
+        }
 }
