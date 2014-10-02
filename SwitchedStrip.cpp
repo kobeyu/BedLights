@@ -3,6 +3,8 @@
 #define MILLIS_BETWEEN_FRAMES 16 //approx 60fps.
 #define ANIMATION_DURATION 5000 //animation takes 5s.
 
+
+
 SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int g, int b, int onState){
 	_lastSwitchState = false;
 	_targetLightState = false;
@@ -12,9 +14,22 @@ SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int
 	_switchPin = switchPin;
 	_onState = onState;
 	pinMode(_switchPin, INPUT_PULLUP);
+        SetTargetColour(r,g,b);
+}
+void SwitchedStrip::SetTargetColour(int r, int g, int b){
 	_r = r;
 	_g = g;
 	_b = b;
+        On(GetState());
+        Serial.print("Set Colour: r:");
+        Serial.print(r);
+        Serial.print(" g:");
+        Serial.print(g);
+        Serial.print(" b:");
+        Serial.println(b);
+}
+bool SwitchedStrip::GetState(){
+  return _targetLightState;
 }
 void SwitchedStrip::On(bool onOrOff){
 	//If we're currently in an animation, then shorten the next animation appropriately.
@@ -26,6 +41,7 @@ void SwitchedStrip::On(bool onOrOff){
 	}
 	animationFinishAt = t + animDur;
 	_targetLightState = onOrOff;
+        Serial.println("Set OnOffState");
 }
 bool SwitchedStrip::Animating(void){
    unsigned long t = millis();
@@ -37,22 +53,16 @@ void SwitchedStrip::Animate(void){
 		lastAnimate = t;
 		unsigned long animationRemaining = animationFinishAt - t;
 		float animProgress = 1 - ((float)animationRemaining / ANIMATION_DURATION);
-		float animBrightness = _lastSwitchState ? animProgress : 1 - animProgress;
+		float animBrightness = _targetLightState ? animProgress : 1 - animProgress;
 		int pixels = _strip->numPixels();
-		Serial.print("Brights (");
-		Serial.print(animBrightness);
-		Serial.print("): ");
 		for (int light = 0; light < pixels; light++){
 			float posBrightness = 2 * ((float)light + 1) / (pixels + 1);
 			if (posBrightness > 1){
 				posBrightness = 2 - posBrightness;
 			}
 			float brightness = posBrightness * animBrightness;
-			Serial.print(brightness);
-			Serial.print(" ");
 			_strip->setPixelColor(light, brightness*_r, brightness*_g, brightness*_b);
 		}
-		Serial.println(".");
 		_strip->show();
 	}
 }
@@ -61,5 +71,6 @@ void SwitchedStrip::ProcessInput(void){
 	if (readVal != _lastSwitchState){
 		_lastSwitchState = readVal;
 		On(_lastSwitchState);
+                Serial.println("Switched.");
 	}
 }

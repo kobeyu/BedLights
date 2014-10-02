@@ -7,6 +7,8 @@ public:
 	void Animate(void);
 	void On(bool onOrOff);
         bool Animating(void);
+        bool GetState(void);
+        void SetTargetColour(int r,int g, int b);
 private:
 	Adafruit_NeoPixel * _strip;
 	int _switchPin;
