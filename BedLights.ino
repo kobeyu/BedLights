@@ -19,9 +19,6 @@ void setup()
         SCmd.addCommand("TOGGLE", switchToggle);
         SCmd.addCommand("SETCOLOUR", setColour);
         SCmd.addDefaultHandler(badFunc);
-        
-        
-        s1.SetTargetColour(10,200,10);
 
 }
 void badFunc(){
