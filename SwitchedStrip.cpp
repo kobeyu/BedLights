@@ -1,37 +1,41 @@
 #include "SwitchedStrip.h"
-#include "Adafruit_NeoPixel.h"
+#include <Adafruit_NeoPixel.h>
 #define MILLIS_BETWEEN_FRAMES 16 //approx 60fps.
 #define ANIMATION_DURATION 5000 //animation takes 5s.
 
-
-
-SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int g, int b, int onState){
-	_lastSwitchState = false;
+SwitchedStrip::SwitchedStrip(int ledPin, int ledCount, int switchPin, int r, int g, int b,char* name){
+	_name = name;
 	_targetLightState = false;
 	_strip = new Adafruit_NeoPixel(ledCount, ledPin, NEO_GRB + NEO_KHZ800);
 	_strip->begin();
-        _strip->setBrightness(200);
+	_strip->setBrightness(200);
 	_switchPin = switchPin;
-	_onState = onState;
 	pinMode(_switchPin, INPUT_PULLUP);
-        SetTargetColour(r,g,b);
+	SetTargetColour(r,g,b);
+	_lastSwitchState = false;// digitalRead(_switchPin) == HIGH;
 }
 void SwitchedStrip::SetTargetColour(int r, int g, int b){
 	_r = r;
 	_g = g;
 	_b = b;
-        On(GetState());
-        Serial.print("Set Colour: r:");
-        Serial.print(r);
-        Serial.print(" g:");
-        Serial.print(g);
-        Serial.print(" b:");
-        Serial.println(b);
+	OnInternal(GetState(),false);
+	Serial.print("Set Colour: r:");
+	Serial.print(r);
+	Serial.print(" g:");
+	Serial.print(g);
+	Serial.print(" b:");
+	Serial.println(b);
 }
 bool SwitchedStrip::GetState(){
   return _targetLightState;
 }
-void SwitchedStrip::On(bool onOrOff){
+void SwitchedStrip::OnSwitch(void(*switchCallback)(bool, char*)) {
+	_switchCallback = switchCallback;
+}
+void SwitchedStrip::On(bool onOrOff) {
+	OnInternal(onOrOff, false);
+}
+void SwitchedStrip::OnInternal(bool onOrOff,bool doCallback){
 	//If we're currently in an animation, then shorten the next animation appropriately.
 	//(We want 0 1 2 1 0 not 0 1 2 10 9 8)
 	int animDur = ANIMATION_DURATION;
@@ -41,7 +45,10 @@ void SwitchedStrip::On(bool onOrOff){
 	}
 	animationFinishAt = t + animDur;
 	_targetLightState = onOrOff;
-        Serial.println("Set OnOffState");
+	Serial.println("Set OnOffState");
+	if (doCallback && _switchCallback) {
+		_switchCallback(onOrOff, _name);
+	}
 }
 bool SwitchedStrip::Animating(void){
    unsigned long t = millis();
@@ -85,10 +92,10 @@ void SwitchedStrip::WriteToLedsFade(float animProgress){
 	_strip->show();  
 }
 void SwitchedStrip::ProcessInput(void){
-	bool readVal = digitalRead(_switchPin) == _onState;
-	if (readVal != _lastSwitchState){
-		_lastSwitchState = readVal;
-		On(_lastSwitchState);
-                Serial.println("Switched.");
+	int read = digitalRead(_switchPin);
+	if (read != _lastSwitchState){
+		_lastSwitchState = read;
+		OnInternal(!_targetLightState,true);
+		Serial.println("Switched.");
 	}
 }
