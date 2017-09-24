@@ -9,8 +9,8 @@
 char jenTopic[] = "Upstairs/GJBedroom/Lights/BedSide/Jen";
 char gregTopic[] = "Upstairs/GJBedroom/Lights/BedSide/Greg";
 
-SwitchedStrip s1 = SwitchedStrip(D0,30,D1,110,50,10,jenTopic); //J
-SwitchedStrip s2 = SwitchedStrip(D2,29,D3,80,80,30,gregTopic); //Me
+SwitchedStrip s1 = SwitchedStrip(D8,30,D6,110,50,10,jenTopic); //J
+SwitchedStrip s2 = SwitchedStrip(D7,29,D5,80,80,30,gregTopic); //Me
 
 char mqtt_server[] = "192.168.4.158";
 char name[32] = "BedLights-";
@@ -144,6 +144,7 @@ void setup_mqtt() {
 }
 void switchChanged(bool state, char*name) {
 	client.publish(name, state ? "ON" : "OFF");
+	Serial.printf("Published to '%s': %s", name, state ? "ON" : "OFF");
 }
 void callback(char* topic, byte* payload, unsigned int length) {
 	Serial.print("MQTT ");
@@ -165,7 +166,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 			digitalWrite(LED_BUILTIN, HIGH);
 		}
 	}
-	else if (strcmp(topic, jenTopic)) {
+	else if (strcmp(topic, jenTopic)==0) {
 		if (strcmp((char*)payload, "ON") == 0)
 		{
 			s1.On(true);
@@ -179,7 +180,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 			s1.On(!s1.GetState());
 		}
 	}
-	else if (strcmp(topic, gregTopic)) {
+	else if (strcmp(topic, gregTopic)==0) {
 		if (strcmp((char*)payload, "ON") == 0)
 		{
 			s2.On(true);
