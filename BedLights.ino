@@ -6,15 +6,16 @@
 #include "SerialCommand.h"
 #include "FS.h"
 
-char jenTopic[] = "Upstairs/GJBedroom/Lights/BedSide/Jen";
-char gregTopic[] = "Upstairs/GJBedroom/Lights/BedSide/Greg";
 
+String mac = WiFi.macAddress();
+char jenTopic[32];
+char gregTopic[32];
+char macCharArr[20];
 SwitchedStrip s1 = SwitchedStrip(D8,30,D6,110,50,10,jenTopic); //J
 SwitchedStrip s2 = SwitchedStrip(D7,29,D5,80,80,30,gregTopic); //Me
 
 char mqtt_server[] = "192.168.4.158";
 char name[32] = "BedLights-";
-String mac = WiFi.macAddress();
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -28,6 +29,9 @@ struct Settings {
 	char OtaPassword[32];
 } settings = { "SSID","PSK","OTAPW" };
 
+void setupTopics() {
+
+}
 void saveConfig(){
 	bool result = SPIFFS.begin();
 	Serial.println("SPIFFS opened:" + result);
@@ -74,13 +78,18 @@ void loadConfig() {
 	}
 	SPIFFS.end();
 }
+
+
 void setup()
 {
-	mac.toCharArray(name+10, 20);
+	mac.toCharArray(macCharArr, 20);
+	sprintf(jenTopic, "Devices/%s/Jen", macCharArr);
+	sprintf(gregTopic, "Devices/%s/Greg", macCharArr);
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, LOW);
 	Serial.begin(115200);
 	Serial.printf("Booting %s...\n", name);
+	Serial.printf("Using topics %s and %s\n", jenTopic, gregTopic);
 	loadConfig();
 	setupWifi();
 	setupOTA();

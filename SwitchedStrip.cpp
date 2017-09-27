@@ -38,6 +38,7 @@ void SwitchedStrip::On(bool onOrOff) {
 void SwitchedStrip::OnInternal(bool onOrOff,bool doCallback){
 	//If we're currently in an animation, then shorten the next animation appropriately.
 	//(We want 0 1 2 1 0 not 0 1 2 10 9 8)
+	if (onOrOff == _targetLightState) return;
 	int animDur = ANIMATION_DURATION;
 	unsigned long t = millis();
 	if (t <= animationFinishAt){
@@ -45,7 +46,6 @@ void SwitchedStrip::OnInternal(bool onOrOff,bool doCallback){
 	}
 	animationFinishAt = t + animDur;
 	_targetLightState = onOrOff;
-	Serial.println("Set OnOffState");
 	if (doCallback && _switchCallback) {
 		_switchCallback(onOrOff, _name);
 	}
